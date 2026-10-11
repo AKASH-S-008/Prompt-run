@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BurnRate — Survive The Month</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons for sleek modern UI icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Google Font: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+            },
+            surface: {
+              950: '#090a0f',
+              900: '#0e1117',
+              850: '#131722',
+              800: '#1b202e',
+              700: '#262d3d',
+              600: '#353e54',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #08090d;
+      color: #e2e8f0;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+    
+    .glass-card {
+      background: rgba(19, 23, 34, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    
+    .glass-card-interactive {
+      background: rgba(19, 23, 34, 0.72);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-interactive:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .pulse-sos {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+      animation: pulse-sos 2s infinite;
+    }
+    @keyframes pulse-sos {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Custom thin scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(14, 17, 23, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .badge-glow-emerald {
+      box-shadow: 0 0 15px -3px rgba(34, 197, 94, 0.35);
+    }
+    .badge-glow-amber {
+      box-shadow: 0 0 15px -3px rgba(245, 158, 11, 0.35);
+    }
+    .badge-glow-rose {
+      box-shadow: 0 0 15px -3px rgba(239, 68, 68, 0.35);
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white flex flex-col justify-between">
+
+  <!-- Top Navigation & Global Controls -->
+  <header class="border-b border-white/5 bg-surface-950/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-emerald-500 to-teal-300 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i class="ph-bold ph-chart-polar text-surface-950 text-xl"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-bold tracking-tight text-white text-base">BurnRate</span>
+            <span class="text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/10">Runway Engine</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">Broke But Functional &middot; Month Survival OS</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Currency Selector -->
+        <div class="relative inline-block text-left">
+          <select id="currencySelector" class="bg-surface-850 hover:bg-surface-800 text-xs font-mono font-medium text-slate-200 border border-white/10 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 cursor-pointer">
+            <option value="₹" selected>INR (₹)</option>
+            <option value="$">USD ($)</option>
+            <option value="€">EUR (€)</option>
+            <option value="£">GBP (£)</option>
+          </select>
+        </div>
+
+        <!-- SOS Mode Quick Switch Button -->
+        <button id="sosModeToggleBtn" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-300 bg-surface-850 border-rose-500/30 text-rose-300 hover:bg-rose-500/10">
+          <i class="ph-fill ph-warning-octagon text-rose-400 text-sm"></i>
+          <span id="sosToggleText">SOS Protocol</span>
+        </button>
+
+        <!-- Export Summary Button -->
+        <button id="exportReportBtn" title="Export monthly summary report" class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-surface-850 border border-white/10 text-slate-300 hover:text-white hover:border-white/20 transition-all">
+          <i class="ph-bold ph-download-simple"></i>
+          <span>Report</span>
+        </button>
+
+        <!-- Reset / Fresh Start Data Modal Trigger -->
+        <button id="resetDataBtn" title="Reset all data" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/5 transition-all text-sm">
+          <i class="ph-bold ph-arrow-counter-clockwise"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6 flex-1">
+    
+    <!-- SOS Banner (Hidden unless triggered or balance critical) -->
+    <div id="sosAlertBanner" class="hidden rounded-xl border border-rose-500/40 bg-gradient-to-r from-rose-950/40 via-surface-900 to-rose-950/30 p-4 relative overflow-hidden backdrop-blur-md">
+      <div class="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-3">
+        <div class="flex items-center space-x-3">
+          <span class="p-2 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 pulse-sos">
+            <i class="ph-fill ph-siren text-xl"></i>
+          </span>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="font-bold text-rose-200 text-sm tracking-wide uppercase">Emergency Low-Liquidity Protocol Engaged</h3>
+              <span class="text-[10px] px-2 py-0.2 bg-rose-500/20 text-rose-300 rounded font-mono font-semibold">CRITICAL</span>
+            </div>
+            <p class="text-xs text-rose-300/80 mt-0.5">Discretionary spending is frozen. Focus strictly on zero-spend calories and deferring non-cutoff obligations.</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 self-end sm:self-auto">
+          <button id="jumpToSosActionBtn" class="text-xs font-medium bg-rose-500 text-white px-3 py-1.5 rounded-lg hover:bg-rose-600 transition-colors shadow-lg shadow-rose-900/40">
+            View Triage Action Plan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Runway Config & Live Input Strip -->
+    <section class="glass-card rounded-2xl p-4 sm:p-5 border border-white/5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+        <!-- Balance Input -->
+        <div>
+          <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+            Total Cash Remaining <span class="text-emerald-400">*</span>
+          </label>
+          <div class="relative flex items-center">
+            <span class="currency-symbol absolute left-3 text-slate-400 font-mono text-sm">₹</span>
+            <input type="number" id="cashRemainingInput" min="0" step="any" class="w-full bg-surface-900 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm font-mono font-semibold text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder-slate-600" placeholder="e.g. 4500">
+          </div>
+        </div>
+
+        <!-- Days Left Input & Calculator Toggle -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="block text-xs font-mono uppercase tracking-wider text-slate-400">
+              Days Left In Month
+            </label>
+            <button id="autoDaysBtn" class="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors">
+              Sync Calendar
+            </button>
+          </div>
+          <div class="relative flex items-center">
+            <i class="ph-bold ph-calendar-blank absolute left-3 text-slate-400 text-sm"></i>
+            <input type="number" id="daysLeftInput" min="1" max="31" class="w-full bg-surface-900 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm font-mono font-semibold text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all" placeholder="Days">
+          </div>
+        </div>
+
+        <!-- Mandatory Fixed Commitments Remaining (Rent/Bills due before 1st) -->
+        <div>
+          <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+            Pending Hard Bills (Due this mo.)
+          </label>
+          <div class="relative flex items-center">
+            <span class="currency-symbol absolute left-3 text-slate-400 font-mono text-sm">₹</span>
+            <input type="number" id="fixedBillsInput" min="0" step="any" class="w-full bg-surface-900 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm font-mono font-semibold text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder-slate-600" placeholder="e.g. 1200">
+          </div>
+        </div>
+
+        <!-- Daily Target Burn Anchor -->
+        <div>
+          <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+            Safety Daily Cap Goal
+          </label>
+          <div class="relative flex items-center">
+            <span class="currency-symbol absolute left-3 text-slate-400 font-mono text-sm">₹</span>
+            <input type="number" id="dailyTargetCapInput" min="0" step="any" class="w-full bg-surface-900 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm font-mono font-semibold text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder-slate-600" placeholder="Target per day">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI Display Cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Safe Daily Burn -->
+      <div class="glass-card-interactive rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium tracking-wide text-slate-400">Safe Daily Burn</span>
+          <span class="p-1.5 rounded-lg bg-white/5 text-slate-300"><i class="ph-bold ph-coins text-sm"></i></span>
+        </div>
+        <div class="flex items-baseline space-x-1.5">
+          <span class="currency-symbol text-slate-400 font-mono text-xl">₹</span>
+          <span id="kpiSafeDailyBurn" class="text-3xl font-bold font-mono tracking-tight text-white">0.00</span>
+          <span class="text-xs text-slate-500 font-mono">/ day</span>
+        </div>
+        <div class="mt-3 flex items-center text-xs text-slate-400">
+          <i class="ph-bold ph-shield-check text-brand-400 mr-1.5"></i>
+          <span id="kpiDailyStatusSubtitle">Calculated strictly after hard bills</span>
+        </div>
+      </div>
+
+      <!-- Runway Health Status -->
+      <div class="glass-card-interactive rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium tracking-wide text-slate-400">Runway Health</span>
+          <span id="healthIconWrapper" class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+            <i class="ph-fill ph-heartbeat text-sm"></i>
+          </span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span id="kpiRunwayHealthBadge" class="px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 badge-glow-emerald">
+            STABLE
+          </span>
+        </div>
+        <div class="mt-3 text-xs text-slate-400 flex items-center justify-between">
+          <span id="kpiHealthDetail">Survival ratio: 100%</span>
+          <span id="daysLeftCounterBadge" class="font-mono text-[11px] text-slate-400">0 days left</span>
+        </div>
+      </div>
+
+      <!-- Spent Today & Residual Limit -->
+      <div class="glass-card-interactive rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium tracking-wide text-slate-400">Today's Remaining Pool</span>
+          <span class="p-1.5 rounded-lg bg-white/5 text-slate-300"><i class="ph-bold ph-hourglass-high text-sm"></i></span>
+        </div>
+        <div class="flex items-baseline space-x-1.5">
+          <span class="currency-symbol text-slate-400 font-mono text-xl">₹</span>
+          <span id="kpiTodayRemaining" class="text-3xl font-bold font-mono tracking-tight text-white">0.00</span>
+        </div>
+        <div class="mt-3 flex items-center justify-between text-xs text-slate-400">
+          <span>Spent today:</span>
+          <span id="kpiSpentToday" class="font-mono text-slate-300">₹0.00</span>
+        </div>
+      </div>
+
+      <!-- Month End Projected Balance -->
+      <div class="glass-card-interactive rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium tracking-wide text-slate-400">Projected 30th Balance</span>
+          <span class="p-1.5 rounded-lg bg-white/5 text-slate-300"><i class="ph-bold ph-trend-up text-sm"></i></span>
+        </div>
+        <div class="flex items-baseline space-x-1.5">
+          <span class="currency-symbol text-slate-400 font-mono text-xl">₹</span>
+          <span id="kpiProjectedSurplus" class="text-3xl font-bold font-mono tracking-tight text-brand-400">0.00</span>
+        </div>
+        <div class="mt-3 text-xs text-slate-400 flex items-center">
+          <i class="ph-bold ph-info mr-1"></i>
+          <span id="kpiSurplusComment">Assuming safe daily velocity</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Tabbed Core Workspaces -->
+    <div class="border-b border-white/10 flex space-x-2 sm:space-x-6 overflow-x-auto pb-1 text-sm">
+      <button class="nav-tab active-tab flex items-center space-x-2 py-2.5 px-3 rounded-lg font-medium text-white bg-white/5 border border-white/10" data-target="tab-triage">
+        <i class="ph-bold ph-lightning text-amber-400"></i>
+        <span>Expense Triage & Log</span>
+      </button>
+      <button class="nav-tab flex items-center space-x-2 py-2.5 px-3 rounded-lg font-medium text-slate-400 hover:text-white transition-colors" data-target="tab-kitchen">
+        <i class="ph-bold ph-bowl-food text-emerald-400"></i>
+        <span>Broke Kitchen Scraper</span>
+      </button>
+      <button class="nav-tab flex items-center space-x-2 py-2.5 px-3 rounded-lg font-medium text-slate-400 hover:text-white transition-colors" data-target="tab-calendar">
+        <i class="ph-bold ph-calendar text-cyan-400"></i>
+        <span>Survival Calendar & Heatmap</span>
+      </button>
+      <button class="nav-tab flex items-center space-x-2 py-2.5 px-3 rounded-lg font-medium text-slate-400 hover:text-white transition-colors" data-target="tab-sos">
+        <i class="ph-bold ph-shield-warning text-rose-400"></i>
+        <span>SOS Protocol & Swaps</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: EXPENSE TRIAGE & QUICK LOG -->
+    <div id="tab-triage" class="tab-pane space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Fast Logging Card -->
+        <div class="lg:col-span-5 glass-card rounded-2xl p-5 border border-white/5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-white tracking-wide flex items-center space-x-2">
+              <i class="ph-bold ph-plus-circle text-brand-400"></i>
+              <span>Log Immediate Spend</span>
+            </h2>
+            <span class="text-[11px] font-mono text-slate-500">Instant Limit Delta</span>
+          </div>
+
+          <form id="expenseForm" class="space-y-3">
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Amount Spent</label>
+              <div class="relative">
+                <span class="currency-symbol absolute left-3 top-2.5 text-slate-400 font-mono text-sm">₹</span>
+                <input type="number" id="expAmountInput" step="any" min="0.01" required class="w-full bg-surface-900 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm font-mono font-semibold text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500" placeholder="0.00">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Description / Item</label>
+              <input type="text" id="expDescInput" required maxlength="40" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500" placeholder="e.g. Oatmeal & milk, Metro ticket">
+            </div>
+
+            <!-- Categories -->
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1.5">Triage Classification</label>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="flex items-center space-x-2 p-2 rounded-lg bg-surface-900 border border-white/5 cursor-pointer hover:border-white/20 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10">
+                  <input type="radio" name="expCategory" value="Groceries" checked class="text-brand-500 focus:ring-0">
+                  <span class="text-slate-300">Groceries / Raw</span>
+                </label>
+                <label class="flex items-center space-x-2 p-2 rounded-lg bg-surface-900 border border-white/5 cursor-pointer hover:border-white/20 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10">
+                  <input type="radio" name="expCategory" value="Canteen/Mess" class="text-brand-500 focus:ring-0">
+                  <span class="text-slate-300">Canteen / Mess</span>
+                </label>
+                <label class="flex items-center space-x-2 p-2 rounded-lg bg-surface-900 border border-white/5 cursor-pointer hover:border-white/20 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10">
+                  <input type="radio" name="expCategory" value="Commute" class="text-brand-500 focus:ring-0">
+                  <span class="text-slate-300">Public Transit</span>
+                </label>
+                <label class="flex items-center space-x-2 p-2 rounded-lg bg-surface-900 border border-white/5 cursor-pointer hover:border-white/20 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10">
+                  <input type="radio" name="expCategory" value="Essentials" class="text-brand-500 focus:ring-0">
+                  <span class="text-slate-300">Meds / Utility</span>
+                </label>
+                <label class="col-span-2 flex items-center space-x-2 p-2 rounded-lg bg-surface-900 border border-rose-500/20 cursor-pointer hover:border-rose-500/40 transition-all has-[:checked]:border-rose-500 has-[:checked]:bg-rose-500/10">
+                  <input type="radio" name="expCategory" value="Splurge" class="text-rose-500 focus:ring-0">
+                  <span class="text-rose-300">Regrettable Splurge / Takeout</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Dynamic Consequence preview -->
+            <div id="impactSimulatorCard" class="p-3 rounded-xl bg-surface-900/90 border border-white/5 text-xs text-slate-400 space-y-1">
+              <div class="flex justify-between">
+                <span>Tomorrow's adjusted limit:</span>
+                <span id="simulatedTomorrowLimit" class="font-mono font-medium text-slate-200">₹0.00</span>
+              </div>
+              <div class="text-[11px] text-slate-500" id="impactSimComment">Logging spend distributes the variance across remaining days.</div>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-surface-950 font-bold text-sm tracking-wide transition-all shadow-lg shadow-emerald-500/20 active:scale-[0.99] flex items-center justify-center space-x-2">
+              <i class="ph-bold ph-check"></i>
+              <span>Log & Recalculate Runway</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Right Column: Recent Logged Stream & Filter -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+              <div>
+                <h3 class="text-sm font-semibold text-white tracking-wide">Monthly Expense Ledger</h3>
+                <p class="text-xs text-slate-400">All expenditures recorded for the active cycle</p>
+              </div>
+              <span id="expenseCountBadge" class="text-xs font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400">0 logs</span>
+            </div>
+
+            <!-- Expense List Scroll Area -->
+            <div id="expenseListContainer" class="mt-3 divide-y divide-white/5 max-h-[380px] overflow-y-auto pr-1">
+              <!-- Dynamically populated or empty state -->
+              <div id="emptyExpensePlaceholder" class="py-12 text-center text-slate-500 space-y-2">
+                <i class="ph-thin ph-receipt text-4xl block text-slate-600"></i>
+                <p class="text-xs">No expenses recorded yet. Your burn rate is clean!</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Summary Bar -->
+          <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+            <span>Total Month Spend Logged:</span>
+            <span id="totalLoggedSpendValue" class="font-mono font-semibold text-slate-200 text-sm">₹0.00</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: BROKE KITCHEN (PANTRY SCRAPER) -->
+    <div id="tab-kitchen" class="tab-pane hidden space-y-6">
+      <div class="glass-card rounded-2xl p-5 border border-white/5">
+        <div class="max-w-2xl">
+          <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono mb-2">
+            <i class="ph-bold ph-fork-knife"></i>
+            <span>Survival Nutrition Engine</span>
+          </div>
+          <h2 class="text-lg font-bold text-white tracking-tight">The Broke Kitchen Pantry Scraper</h2>
+          <p class="text-xs text-slate-400 mt-1">Select whatever random leftover staples you have in your cupboards. We'll generate immediate high-yield meals costing almost zero money.</p>
+        </div>
+
+        <!-- Ingredient Chips Selector -->
+        <div class="mt-4">
+          <span class="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-2">Select Your Available Supplies:</span>
+          <div class="flex flex-wrap gap-2" id="pantryChipsContainer">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center space-x-3">
+          <button id="scrapeRecipesBtn" class="px-4 py-2 rounded-xl bg-surface-800 hover:bg-surface-700 border border-white/10 text-white font-medium text-xs flex items-center space-x-2 transition-all">
+            <i class="ph-bold ph-sparkle text-emerald-400"></i>
+            <span>Match Survival Recipes</span>
+          </button>
+          <span class="text-xs text-slate-400" id="ingredientMatchCount">0 ingredients selected</span>
+        </div>
+      </div>
+
+      <!-- Recipe Cards Grid -->
+      <div id="recipeResultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Dynamic recipe cards rendered here -->
+      </div>
+    </div>
+
+    <!-- TAB 3: SURVIVAL CALENDAR & HEATMAP -->
+    <div id="tab-calendar" class="tab-pane hidden space-y-6">
+      <div class="glass-card rounded-2xl p-5 border border-white/5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-bold text-white tracking-tight flex items-center space-x-2">
+              <i class="ph-bold ph-calendar-check text-cyan-400"></i>
+              <span>Monthly Runway Heatmap & Milestones</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Track your discipline per day. Green = within daily burn; Red = overshot limit.</p>
+          </div>
+          
+          <!-- Month Stats Strip -->
+          <div class="flex items-center space-x-4 text-xs font-mono">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-3 h-3 rounded-full bg-emerald-500/30 border border-emerald-500"></span>
+              <span class="text-slate-300">Under Budget</span>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <span class="w-3 h-3 rounded-full bg-rose-500/30 border border-rose-500"></span>
+              <span class="text-slate-300">Over Budget</span>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <span class="w-3 h-3 rounded-full bg-slate-800 border border-white/20"></span>
+              <span class="text-slate-300">Pending</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Runway Progress Meter -->
+        <div class="mt-5 space-y-2">
+          <div class="flex justify-between text-xs text-slate-400 font-mono">
+            <span>Cycle Elapsed: <span id="calendarPercentElapsed" class="text-white font-semibold">60%</span></span>
+            <span>Target: Reaching Day 30/31 Solvency</span>
+          </div>
+          <div class="w-full bg-surface-900 h-2.5 rounded-full overflow-hidden border border-white/5 p-0.5">
+            <div id="calendarRunwayProgressBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 rounded-full transition-all duration-500" style="width: 30%"></div>
+          </div>
+        </div>
+
+        <!-- 30-Day Grid Layout -->
+        <div class="mt-6">
+          <div id="survivalCalendarGrid" class="grid grid-cols-5 sm:grid-cols-7 gap-2">
+            <!-- Dynamic days rendered here -->
+          </div>
+        </div>
+
+        <!-- Zero-Spend Streak Trophy -->
+        <div class="mt-6 p-4 rounded-xl bg-surface-900 border border-white/5 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+              <i class="ph-bold ph-medal"></i>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-white">Zero-Spend Day Streaks</div>
+              <div class="text-[11px] text-slate-400">Going 24h with $0/₹0 spent creates massive safety margin compound.</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div id="zeroSpendStreakCount" class="text-xl font-bold font-mono text-amber-400">0 Days</div>
+            <span class="text-[10px] text-slate-500 uppercase tracking-wider font-mono">Active Streak</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: SOS PROTOCOL & SWAPS -->
+    <div id="tab-sos" class="tab-pane hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Bill Deferral Priority Matrix -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-5 border border-white/5 space-y-4">
+          <div>
+            <div class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-mono uppercase">
+              <i class="ph-bold ph-shield-chevron"></i>
+              <span>Triage Matrix</span>
+            </div>
+            <h2 class="text-base font-bold text-white mt-1">Which Obligations Can Be Pushed?</h2>
+            <p class="text-xs text-slate-400">When broke, never pay bills equally. Categorize them strictly by immediate cutoff penalties.</p>
+          </div>
+
+          <div class="space-y-3" id="triageChecklistContainer">
+            <!-- Item 1 -->
+            <div class="p-3.5 rounded-xl bg-surface-900 border border-rose-500/20 flex items-start space-x-3">
+              <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-mono font-bold uppercase mt-0.5">CRITICAL</span>
+              <div class="flex-1 text-xs">
+                <span class="font-semibold text-white">Wifi / Phone Cellular Bill</span>
+                <p class="text-slate-400 mt-0.5">Never cut. Required for remote income, banking OTPs, and job interviews. Pay minimal prepaid pack.</p>
+              </div>
+              <span class="text-rose-400 text-xs font-mono font-medium">DO NOT DEFER</span>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="p-3.5 rounded-xl bg-surface-900 border border-amber-500/20 flex items-start space-x-3">
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono font-bold uppercase mt-0.5">NEGOTIATE</span>
+              <div class="flex-1 text-xs">
+                <span class="font-semibold text-white">Landlord / Rent Remainder</span>
+                <p class="text-slate-400 mt-0.5">Most landlords will accept a 7-day delay if notified before the 1st with transparency rather than ghosting.</p>
+              </div>
+              <span class="text-amber-400 text-xs font-mono font-medium">Safe Grace: 5-7d</span>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="p-3.5 rounded-xl bg-surface-900 border border-emerald-500/20 flex items-start space-x-3">
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold uppercase mt-0.5">FREEZE</span>
+              <div class="flex-1 text-xs">
+                <span class="font-semibold text-white">Streaming & Digital Subscriptions</span>
+                <p class="text-slate-400 mt-0.5">Netflix, Spotify, gym recurring subscriptions. Pause or cancel immediately with 1 click.</p>
+              </div>
+              <span class="text-emerald-400 text-xs font-mono font-medium">Cut Right Now</span>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="p-3.5 rounded-xl bg-surface-900 border border-emerald-500/20 flex items-start space-x-3">
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold uppercase mt-0.5">FREEZE</span>
+              <div class="flex-1 text-xs">
+                <span class="font-semibold text-white">Credit Card Minimum vs Full Payment</span>
+                <p class="text-slate-400 mt-0.5">If facing starvation, pay only minimum due this month. Preserve physical liquid cash for meals.</p>
+              </div>
+              <span class="text-emerald-400 text-xs font-mono font-medium">Pay Min Only</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Zero-Cost Functional Swaps -->
+        <div class="lg:col-span-5 glass-card rounded-2xl p-5 border border-white/5 space-y-4">
+          <div>
+            <div class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono uppercase">
+              <i class="ph-bold ph-arrows-left-right"></i>
+              <span>High-Impact Swaps</span>
+            </div>
+            <h2 class="text-base font-bold text-white mt-1">Zero-Cost Living Substitutions</h2>
+            <p class="text-xs text-slate-400">Survive comfortably without feeling humiliated.</p>
+          </div>
+
+          <div class="space-y-2.5 text-xs">
+            <div class="p-3 rounded-xl bg-surface-900 border border-white/5 space-y-1">
+              <div class="flex justify-between font-medium">
+                <span class="text-rose-400 line-through">Uber / Auto-Rickshaw</span>
+                <span class="text-brand-400">→ Bicycle / Public Metro</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Save 80-90% transit costs daily; walking gives dopamine for zero spend.</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-surface-900 border border-white/5 space-y-1">
+              <div class="flex justify-between font-medium">
+                <span class="text-rose-400 line-through">Cafe Work Sessions</span>
+                <span class="text-brand-400">→ Public Library / Co-working Free Trial</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Free high-speed wifi, AC, and quiet desks with zero purchase pressure.</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-surface-900 border border-white/5 space-y-1">
+              <div class="flex justify-between font-medium">
+                <span class="text-rose-400 line-through">Commercial Energy Drinks</span>
+                <span class="text-brand-400">→ Black Coffee / Lemon Salt Water</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Replenishes electrolytes and caffeine for 1/20th the cost.</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-surface-900 border border-white/5 space-y-1">
+              <div class="flex justify-between font-medium">
+                <span class="text-rose-400 line-through">Paid Night Out with Friends</span>
+                <span class="text-brand-400">→ Boardgame Night / Potluck</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Host at home. Real friends don't care if you're saving for the month.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Summary Report Modal -->
+  <div id="reportModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full rounded-2xl p-6 border border-white/10 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center space-x-2">
+          <i class="ph-bold ph-file-text text-brand-400 text-xl"></i>
+          <h3 class="text-base font-bold text-white">Monthly Survival Executive Report</h3>
+        </div>
+        <button id="closeReportModalBtn" class="text-slate-400 hover:text-white text-lg">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <div id="reportModalBody" class="font-mono text-xs text-slate-300 space-y-2 bg-surface-950 p-4 rounded-xl border border-white/5 whitespace-pre-wrap max-h-96 overflow-y-auto">
+        <!-- Rendered Report Text -->
+      </div>
+
+      <div class="flex justify-end space-x-3 pt-2">
+        <button id="copyReportTextBtn" class="px-3.5 py-2 rounded-xl bg-surface-800 hover:bg-surface-700 text-xs font-semibold text-white border border-white/10 flex items-center space-x-1.5 transition-all">
+          <i class="ph-bold ph-copy"></i>
+          <span id="copyReportBtnLabel">Copy to Clipboard</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Confirmation Modal (No native alert/confirm) -->
+  <div id="confirmResetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-sm w-full rounded-2xl p-6 border border-rose-500/20 space-y-4 text-center">
+      <div class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-2xl">
+        <i class="ph-bold ph-trash"></i>
+      </div>
+      <div>
+        <h4 class="text-base font-bold text-white">Reset Survival Ledger?</h4>
+        <p class="text-xs text-slate-400 mt-1">This will clear your local balance settings, logged expenses, and calendar days. This cannot be undone.</p>
+      </div>
+      <div class="flex space-x-3 pt-2">
+        <button id="cancelResetBtn" class="flex-1 py-2 rounded-xl bg-surface-800 hover:bg-surface-700 text-xs font-semibold text-slate-300">
+          Cancel
+        </button>
+        <button id="confirmExecuteResetBtn" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white shadow-lg shadow-rose-900/30">
+          Wipe Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modern In-App Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 pointer-events-none transition-all duration-300 opacity-0 transform translate-y-3">
+    <div class="glass-card px-4 py-3 rounded-xl border border-white/15 text-xs text-white shadow-2xl flex items-center space-x-2.5">
+      <i id="toastIcon" class="ph-fill ph-check-circle text-emerald-400 text-base"></i>
+      <span id="toastMessage">Action successful</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/5 py-4 bg-surface-950/60 text-center text-xs text-slate-500">
+    BurnRate &middot; Broke But Functional Engine &middot; Real-Time Local Computation
+  </footer>
+
+  <script>
+    /*
+      =======================================================
+      BURNRATE APPLICATION CORE ENGINE
+      Handles calculations, local persistence, real-time reactive
+      runway estimates, pantry matches, and UI tab navigation.
+      =======================================================
+    */
+
+    // Default or stored state
+    const STORAGE_KEY = 'burnrate_survival_state_v1';
+
+    // Global application data model
+    let appState = {
+      currency: '₹',
+      cashRemaining: 4200,
+      daysLeft: 14,
+      fixedBills: 800,
+      dailyTargetCap: 250,
+      sosModeActive: false,
+      expenses: [
+        { id: 1, desc: 'Eggs & Brown Bread', amount: 120, category: 'Groceries', timestamp: new Date().toISOString() },
+        { id: 2, desc: 'Metro transit reload', amount: 150, category: 'Commute', timestamp: new Date().toISOString() }
+      ],
+      selectedPantryItems: ['Eggs', 'Rice', 'Onion', 'Soy Sauce'],
+      lastCalendarDateSynced: null
+    };
+
+    // Pantry ingredients dataset with nutritional survival metadata
+    const PANTRY_ITEMS = [
+      { id: 'Eggs', name: 'Eggs (Protein)', icon: 'ph-egg' },
+      { id: 'Rice', name: 'White/Brown Rice', icon: 'ph-bowl-food' },
+      { id: 'Maggi/Ramen', name: 'Instant Noodles / Maggi', icon: 'ph-cooking-pot' },
+      { id: 'Lentils/Dal', name: 'Lentils / Dal', icon: 'ph-plant' },
+      { id: 'Bread', name: 'Bread Loaf', icon: 'ph-brand-bread' },
+      { id: 'Potato', name: 'Potatoes', icon: 'ph-circle' },
+      { id: 'Onion', name: 'Onions', icon: 'ph-circle-dashed' },
+      { id: 'Soy Sauce', name: 'Soy Sauce / Vinegar', icon: 'ph-drop' },
+      { id: 'Oats', name: 'Rolled Oats', icon: 'ph-grain' },
+      { id: 'Garlic/Chili', name: 'Garlic / Chilis', icon: 'ph-fire' },
+      { id: 'Cooking Oil', name: 'Cooking Oil', icon: 'ph-flask' }
+    ];
+
+    // Curated high-calorie functional recipes
+    const SURVIVAL_RECIPES = [
+      {
+        name: 'Savory Crispy Fried Egg Rice',
+        req: ['Eggs', 'Rice', 'Soy Sauce'],
+        calories: '~520 kcal',
+        prepTime: '8 mins',
+        cost: '~₹25 / $0.30',
+        steps: 'Heat a pan with a drop of oil. Crack 2 eggs directly with rice. Toss over high heat with 1 tsp soy sauce. Crispy, filling, complete protein.'
+      },
+      {
+        name: 'Golden Curried Dal Khichdi / Lentil Mash',
+        req: ['Lentils/Dal', 'Rice', 'Onion'],
+        calories: '~610 kcal',
+        prepTime: '20 mins',
+        cost: '~₹30 / $0.35',
+        steps: 'Boil equal parts lentils and rice with sliced onions and turmeric/salt. Super satisfying comfort food with zero meat cost and all 9 essential amino acids.'
+      },
+      {
+        name: 'Vegetable Loaded Broke Ramen',
+        req: ['Maggi/Ramen', 'Egg', 'Onion'],
+        calories: '~480 kcal',
+        prepTime: '6 mins',
+        cost: '~₹25 / $0.32',
+        steps: 'Cook instant noodles with broth. Crack an egg in the simmering water and cover for 2 mins to poach. Top with fried raw onion slices for crunch.'
+      },
+      {
+        name: 'Crispy Garlic Spiced Potato Wedges',
+        req: ['Potato', 'Cooking Oil', 'Garlic/Chili'],
+        calories: '~440 kcal',
+        prepTime: '15 mins',
+        cost: '~₹18 / $0.20',
+        steps: 'Slice potatoes thin. Pan fry or roast with a splash of oil and chili flakes. Extreme carb density to keep hunger suppressed for 5+ hours.'
+      },
+      {
+        name: 'Protein Egg French Toast (Savory)',
+        req: ['Bread', 'Eggs', 'Onion'],
+        calories: '~410 kcal',
+        prepTime: '7 mins',
+        cost: '~₹28 / $0.35',
+        steps: 'Beat 2 eggs with finely minced onion, salt, and pepper. Dip stale bread slices and pan-sear until golden on both sides.'
+      },
+      {
+        name: 'High-Fuel Peanut / Oil Oatmeal Porridge',
+        req: ['Oats', 'Bread'],
+        calories: '~380 kcal',
+        prepTime: '5 mins',
+        cost: '~₹20 / $0.25',
+        steps: 'Boil oats with water and a pinch of salt until thick. If you have any sugar, cinnamon or banana, add on top.'
+      }
+    ];
+
+    function loadPersistedState() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          appState = { ...appState, ...parsed };
+        } else {
+          // Calculate default days left dynamically
+          syncDaysRemainingFromCalendar();
+        }
+      } catch (err) {
+        console.warn('Could not read state from localStorage', err);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        console.error('Failed saving to localStorage', err);
+      }
+    }
+
+    function syncDaysRemainingFromCalendar() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const currentDay = now.getDate();
+      const remaining = Math.max(1, (totalDaysInMonth - currentDay) + 1);
+      appState.daysLeft = remaining;
+      document.getElementById('daysLeftInput').value = remaining;
+      showToast(`Calendar synced: ${remaining} days left in cycle`);
+      recalculateAll();
+    }
+
+    function getTodaySpentAmount() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      return appState.expenses
+        .filter(exp => exp.timestamp.startsWith(todayStr))
+        .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    }
+
+    function recalculateAll() {
+      const cash = Math.max(0, parseFloat(appState.cashRemaining) || 0);
+      const bills = Math.max(0, parseFloat(appState.fixedBills) || 0);
+      const days = Math.max(1, parseInt(appState.daysLeft) || 1);
+      const targetCap = Math.max(0, parseFloat(appState.dailyTargetCap) || 0);
+
+      // Usable cash pool strictly for daily survival
+      const usableLiquidPool = Math.max(0, cash - bills);
+      
+      // Safe daily burn calculation
+      const safeDailyBurn = (days > 0) ? (usableLiquidPool / days) : 0;
+
+      // Today's spending status
+      const spentToday = getTodaySpentAmount();
+      const todayRemaining = Math.max(0, safeDailyBurn - spentToday);
+
+      // Total expenditures recorded in array
+      const totalLogged = appState.expenses.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+
+      // Projected End of month balance:
+      // If user spends at their safeDailyBurn rate: balance should land near ₹0 (or buffer)
+      // If user continues at targetCap rate:
+      const projectedDeficitOrSurplus = usableLiquidPool - (targetCap * days);
+
+      // Determine Runway status level
+      let runwayHealth = 'STABLE';
+      let badgeClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 badge-glow-emerald';
+      let isCriticalSOS = false;
+
+      if (usableLiquidPool <= 0 || safeDailyBurn < (targetCap * 0.4)) {
+        runwayHealth = 'CRITICAL SOS';
+        badgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40 badge-glow-rose';
+        isCriticalSOS = true;
+      } else if (safeDailyBurn < (targetCap * 0.8)) {
+        runwayHealth = 'TIGHT RUNWAY';
+        badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/30 badge-glow-amber';
+      }
+
+      // Update UI elements
+      document.getElementById('kpiSafeDailyBurn').textContent = safeDailyBurn.toFixed(2);
+      document.getElementById('kpiTodayRemaining').textContent = todayRemaining.toFixed(2);
+      document.getElementById('kpiSpentToday').textContent = `${appState.currency}${spentToday.toFixed(2)}`;
+      
+      const healthBadge = document.getElementById('kpiRunwayHealthBadge');
+      healthBadge.className = `px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase tracking-wider border ${badgeClass}`;
+      healthBadge.textContent = runwayHealth;
+
+      document.getElementById('kpiHealthDetail').textContent = `Net Pool: ${appState.currency}${usableLiquidPool.toFixed(0)}`;
+      document.getElementById('daysLeftCounterBadge').textContent = `${days} days runway`;
+
+      const projEl = document.getElementById('kpiProjectedSurplus');
+      if (projectedDeficitOrSurplus >= 0) {
+        projEl.textContent = `+${projectedDeficitOrSurplus.toFixed(2)}`;
+        projEl.className = 'text-3xl font-bold font-mono tracking-tight text-emerald-400';
+        document.getElementById('kpiSurplusComment').textContent = 'Surplus buffer at current target cap';
+      } else {
+        projEl.textContent = `${projectedDeficitOrSurplus.toFixed(2)}`;
+        projEl.className = 'text-3xl font-bold font-mono tracking-tight text-rose-400';
+        document.getElementById('kpiSurplusComment').textContent = 'Deficit hazard! Lower your daily burn';
+      }
+
+      // SOS Banner Visibility
+      const banner = document.getElementById('sosAlertBanner');
+      if (isCriticalSOS || appState.sosModeActive) {
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+
+      // Simulated next-day impact preview calculation
+      updateImpactPreview();
+
+      // Render updated expenses list
+      renderExpensesLedger(totalLogged);
+
+      // Render calendar
+      renderCalendar(safeDailyBurn, days);
+
+      saveState();
+    }
+
+    function updateImpactPreview() {
+      const expInputVal = parseFloat(document.getElementById('expAmountInput').value) || 0;
+      const cash = Math.max(0, parseFloat(appState.cashRemaining) || 0);
+      const bills = Math.max(0, parseFloat(appState.fixedBills) || 0);
+      const days = Math.max(1, parseInt(appState.daysLeft) || 1);
+      
+      const afterRemaining = Math.max(0, (cash - bills) - expInputVal);
+      const remainingDaysAfterToday = Math.max(1, days - 1);
+      const simulatedNextDay = (afterRemaining / remainingDaysAfterToday);
+
+      document.getElementById('simulatedTomorrowLimit').textContent = `${appState.currency}${simulatedNextDay.toFixed(2)}/day`;
+    }
+
+    function renderExpensesLedger(totalLogged) {
+      const listContainer = document.getElementById('expenseListContainer');
+      const emptyPlaceholder = document.getElementById('emptyExpensePlaceholder');
+      const countBadge = document.getElementById('expenseCountBadge');
+      const totalLoggedValue = document.getElementById('totalLoggedSpendValue');
+
+      countBadge.textContent = `${appState.expenses.length} logs`;
+      totalLoggedValue.textContent = `${appState.currency}${totalLogged.toFixed(2)}`;
+
+      if (appState.expenses.length === 0) {
+        listContainer.innerHTML = '';
+        listContainer.appendChild(emptyPlaceholder);
+        emptyPlaceholder.classList.remove('hidden');
+        return;
+      }
+
+      let html = '';
+      // Show latest first
+      const sorted = [...appState.expenses].reverse();
+
+      sorted.forEach(item => {
+        let catColor = 'bg-slate-800 text-slate-300 border-white/10';
+        let icon = 'ph-receipt';
+
+        if (item.category === 'Groceries') {
+          catColor = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+          icon = 'ph-bowl-food';
+        } else if (item.category === 'Canteen/Mess') {
+          catColor = 'bg-teal-500/10 text-teal-300 border-teal-500/20';
+          icon = 'ph-coffee';
+        } else if (item.category === 'Commute') {
+          catColor = 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20';
+          icon = 'ph-bus';
+        } else if (item.category === 'Splurge') {
+          catColor = 'bg-rose-500/15 text-rose-300 border-rose-500/30';
+          icon = 'ph-warning-diamond';
+        }
+
+        const dateObj = new Date(item.timestamp);
+        const timeFormatted = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateFormatted = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+        html += `
+          <div class="py-2.5 flex items-center justify-between group hover:bg-white/[0.02] px-2 rounded-lg transition-colors">
+            <div class="flex items-center space-x-3">
+              <span class="p-2 rounded-lg bg-surface-900 border border-white/10 text-slate-400">
+                <i class="ph-bold ${icon} text-sm"></i>
+              </span>
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-semibold text-white">${escapeHtml(item.desc)}</span>
+                  <span class="text-[10px] font-mono px-2 py-0.2 rounded-full border ${catColor}">
+                    ${item.category}
+                  </span>
+                </div>
+                <span class="text-[10px] font-mono text-slate-500">${dateFormatted} &middot; ${timeFormatted}</span>
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <span class="font-mono font-bold text-xs text-white">-${appState.currency}${parseFloat(item.amount).toFixed(2)}</span>
+              <button onclick="removeExpense(${item.id})" title="Delete entry" class="text-slate-600 hover:text-rose-400 opacity-60 group-hover:opacity-100 transition-all p-1">
+                <i class="ph-bold ph-trash text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      listContainer.innerHTML = html;
+    }
+
+    window.removeExpense = function(id) {
+      const idx = appState.expenses.findIndex(e => e.id === id);
+      if (idx !== -1) {
+        const removed = appState.expenses.splice(idx, 1)[0];
+        // Replenish cash remaining
+        appState.cashRemaining = parseFloat(appState.cashRemaining || 0) + parseFloat(removed.amount || 0);
+        document.getElementById('cashRemainingInput').value = appState.cashRemaining;
+        showToast(`Refunded ${appState.currency}${removed.amount} to runway`);
+        recalculateAll();
+      }
+    };
+
+    function initPantryChips() {
+      const container = document.getElementById('pantryChipsContainer');
+      container.innerHTML = '';
+
+      PANTRY_ITEMS.forEach(item => {
+        const isSelected = appState.selectedPantryItems.includes(item.id);
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = `px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition-all ${
+          isSelected 
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+            : 'bg-surface-900 text-slate-400 border-white/10 hover:border-white/20'
+        }`;
+        chip.innerHTML = `<i class="ph-bold ${item.icon}"></i><span>${item.name}</span>`;
+
+        chip.addEventListener('click', () => {
+          if (appState.selectedPantryItems.includes(item.id)) {
+            appState.selectedPantryItems = appState.selectedPantryItems.filter(x => x !== item.id);
+          } else {
+            appState.selectedPantryItems.push(item.id);
+          }
+          initPantryChips();
+          matchSurvivalRecipes();
+          saveState();
+        });
+
+        container.appendChild(chip);
+      });
+
+      document.getElementById('ingredientMatchCount').textContent = `${appState.selectedPantryItems.length} ingredients selected`;
+    }
+
+    function matchSurvivalRecipes() {
+      const resultsGrid = document.getElementById('recipeResultsGrid');
+      resultsGrid.innerHTML = '';
+
+      const matched = SURVIVAL_RECIPES.filter(recipe => {
+        // Check how many ingredients match
+        const matches = recipe.req.filter(r => appState.selectedPantryItems.some(item => item.includes(r) || r.includes(item)));
+        return matches.length >= 1; // Show if at least 1 key pantry staple matches
+      });
+
+      if (matched.length === 0) {
+        resultsGrid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500 space-y-2">
+            <i class="ph-thin ph-cooking-pot text-4xl block text-slate-600"></i>
+            <p class="text-xs">No direct recipes found. Try selecting staples like Eggs, Rice, or Bread above!</p>
+          </div>
+        `;
+        return;
+      }
+
+      matched.forEach(recipe => {
+        const card = document.createElement('div');
+        card.className = 'glass-card-interactive rounded-2xl p-4 border border-white/5 space-y-3 flex flex-col justify-between';
+        
+        const reqChips = recipe.req.map(r => {
+          const hasIt = appState.selectedPantryItems.some(item => item.includes(r) || r.includes(item));
+          return `<span class="text-[10px] px-2 py-0.5 rounded font-mono ${hasIt ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}">${r}</span>`;
+        }).join(' ');
+
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-start justify-between">
+              <h4 class="text-sm font-bold text-white tracking-wide">${recipe.name}</h4>
+              <span class="text-[11px] font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">${recipe.cost}</span>
+            </div>
+            
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              ${reqChips}
+            </div>
+
+            <p class="text-xs text-slate-300/90 leading-relaxed pt-1">${recipe.steps}</p>
+          </div>
+
+          <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span class="flex items-center"><i class="ph-bold ph-timer mr-1"></i>${recipe.prepTime}</span>
+            <span class="flex items-center"><i class="ph-bold ph-lightning mr-1 text-amber-400"></i>${recipe.calories}</span>
+          </div>
+        `;
+        resultsGrid.appendChild(card);
+      });
+    }
+
+    function renderCalendar(safeDailyBurn, daysLeft) {
+      const grid = document.getElementById('survivalCalendarGrid');
+      grid.innerHTML = '';
+
+      const now = new Date();
+      const currentDayNumber = now.getDate();
+      const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+      // Progress bar percentage
+      const percentElapsed = Math.min(100, Math.round(((totalDaysInMonth - daysLeft) / totalDaysInMonth) * 100));
+      document.getElementById('calendarPercentElapsed').textContent = `${percentElapsed}%`;
+      document.getElementById('calendarRunwayProgressBar').style.width = `${percentElapsed}%`;
+
+      let zeroSpendCount = 0;
+
+      for (let day = 1; day <= totalDaysInMonth; day++) {
+        const dayTile = document.createElement('div');
+        dayTile.className = 'p-2.5 rounded-xl border flex flex-col justify-between h-20 transition-all text-xs';
+
+        const isPastOrToday = day <= (totalDaysInMonth - daysLeft + 1);
+        const isToday = day === currentDayNumber;
+
+        if (isToday) {
+          dayTile.classList.add('border-brand-500', 'bg-brand-500/10', 'ring-1', 'ring-brand-500');
+        } else if (isPastOrToday) {
+          // Check simulated mock or logged health for this day
+          if (day % 4 === 0) {
+            // Overspend day example
+            dayTile.classList.add('border-rose-500/30', 'bg-rose-500/10');
+          } else {
+            // Disciplined green day
+            dayTile.classList.add('border-emerald-500/20', 'bg-emerald-500/5');
+            zeroSpendCount++;
+          }
+        } else {
+          // Future runway days
+          dayTile.classList.add('border-white/5', 'bg-surface-900', 'opacity-60');
+        }
+
+        dayTile.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-mono font-bold ${isToday ? 'text-brand-300' : 'text-slate-400'}">${day}</span>
+            ${isToday ? '<span class="text-[9px] uppercase px-1 rounded bg-brand-500 text-surface-950 font-bold">TODAY</span>' : ''}
+          </div>
+          <div class="text-[10px] font-mono text-slate-500">
+            ${isPastOrToday ? 'Logged' : 'Safe Cap'}
+          </div>
+        `;
+
+        grid.appendChild(dayTile);
+      }
+
+      document.getElementById('zeroSpendStreakCount').textContent = `${Math.min(daysLeft, 3)} Days`;
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMessage');
+      const iconEl = document.getElementById('toastIcon');
+
+      msgEl.textContent = message;
+      if (isError) {
+        iconEl.className = 'ph-fill ph-warning-circle text-rose-400 text-base';
+      } else {
+        iconEl.className = 'ph-fill ph-check-circle text-emerald-400 text-base';
+      }
+
+      toast.classList.remove('opacity-0', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-3');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2500);
+    }
+
+    function generateMonthlyReport() {
+      const safeDaily = (Math.max(0, appState.cashRemaining - appState.fixedBills) / Math.max(1, appState.daysLeft)).toFixed(2);
+      const spentToday = getTodaySpentAmount().toFixed(2);
+      const totalLogged = appState.expenses.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0).toFixed(2);
+
+      const report = `=========================================
+BURNRATE — SURVIVAL REPORT SUMMARY
+Date: ${new Date().toLocaleDateString()}
+Theme: Broke But Functional
+=========================================
+
+[FINANCIAL RUNWAY]
+- Total Liquid Cash: ${appState.currency}${appState.cashRemaining}
+- Hard Bills Pending: ${appState.currency}${appState.fixedBills}
+- Days Left in Cycle: ${appState.daysLeft} days
+- Safe Daily Burn Cap: ${appState.currency}${safeDaily} / day
+- Spent Today: ${appState.currency}${spentToday}
+- Total Logged Expenses: ${appState.currency}${totalLogged}
+
+[ACTIVE EXPENSE LEDGER (${appState.expenses.length} Entries)]
+${appState.expenses.map(e => `• [${e.category}] ${e.desc}: -${appState.currency}${e.amount}`).join('\n') || 'No expenses logged'}
+
+[PANTRY RESILIENCE]
+Staples Available: ${appState.selectedPantryItems.join(', ') || 'None selected'}
+
+[SURVIVAL RECOMMENDATION]
+${parseFloat(safeDaily) < 150 
+  ? 'STATUS: EXTREME CONSERVATION. Eat only staple carbs + eggs. Avoid paid transit.' 
+  : 'STATUS: SUSTAINABLE. Stick to the daily cap and defer non-critical subscriptions.'}
+=========================================`;
+
+      return report;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPersistedState();
+
+      // Populate input values from loaded state
+      document.getElementById('cashRemainingInput').value = appState.cashRemaining;
+      document.getElementById('daysLeftInput').value = appState.daysLeft;
+      document.getElementById('fixedBillsInput').value = appState.fixedBills;
+      document.getElementById('dailyTargetCapInput').value = appState.dailyTargetCap;
+      document.getElementById('currencySelector').value = appState.currency;
+
+      // Update currency symbols across page
+      document.querySelectorAll('.currency-symbol').forEach(el => el.textContent = appState.currency);
+
+      // Initialize pantry and recipes
+      initPantryChips();
+      matchSurvivalRecipes();
+
+      // Initial Recalculation
+      recalculateAll();
+
+      // Input Event Listeners for Reactive Calculations
+      const reactiveInputs = ['cashRemainingInput', 'daysLeftInput', 'fixedBillsInput', 'dailyTargetCapInput'];
+      reactiveInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          if (id === 'cashRemainingInput') appState.cashRemaining = parseFloat(e.target.value) || 0;
+          if (id === 'daysLeftInput') appState.daysLeft = parseInt(e.target.value) || 1;
+          if (id === 'fixedBillsInput') appState.fixedBills = parseFloat(e.target.value) || 0;
+          if (id === 'dailyTargetCapInput') appState.dailyTargetCap = parseFloat(e.target.value) || 0;
+          recalculateAll();
+        });
+      });
+
+      // Expense amount input live delta simulator
+      document.getElementById('expAmountInput').addEventListener('input', updateImpactPreview);
+
+      // Expense Logging Form Submission
+      document.getElementById('expenseForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const amt = parseFloat(document.getElementById('expAmountInput').value);
+        const desc = document.getElementById('expDescInput').value.trim();
+        const catRadio = document.querySelector('input[name="expCategory"]:checked');
+        const category = catRadio ? catRadio.value : 'Essentials';
+
+        if (!amt || amt <= 0 || !desc) return;
+
+        // Create expense entry
+        const newExpense = {
+          id: Date.now(),
+          desc: desc,
+          amount: amt,
+          category: category,
+          timestamp: new Date().toISOString()
+        };
+
+        appState.expenses.push(newExpense);
+        
+        // Deduct from total cash
+        appState.cashRemaining = Math.max(0, (parseFloat(appState.cashRemaining) || 0) - amt);
+        document.getElementById('cashRemainingInput').value = appState.cashRemaining;
+
+        // Reset form inputs
+        document.getElementById('expAmountInput').value = '';
+        document.getElementById('expDescInput').value = '';
+
+        showToast(`Logged -${appState.currency}${amt.toFixed(2)} (${category})`);
+        recalculateAll();
+      });
+
+      // Tab navigation handling
+      document.querySelectorAll('.nav-tab').forEach(button => {
+        button.addEventListener('click', () => {
+          const target = button.getAttribute('data-target');
+
+          // Highlight tab button
+          document.querySelectorAll('.nav-tab').forEach(b => {
+            b.classList.remove('active-tab', 'text-white', 'bg-white/5', 'border', 'border-white/10');
+            b.classList.add('text-slate-400');
+          });
+          button.classList.add('active-tab', 'text-white', 'bg-white/5', 'border', 'border-white/10');
+          button.classList.remove('text-slate-400');
+
+          // Show targeted tab panel
+          document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+          document.getElementById(target).classList.remove('hidden');
+        });
+      });
+
+      // SOS Mode Toggle
+      const sosToggleBtn = document.getElementById('sosModeToggleBtn');
+      sosToggleBtn.addEventListener('click', () => {
+        appState.sosModeActive = !appState.sosModeActive;
+        if (appState.sosModeActive) {
+          sosToggleBtn.classList.add('bg-rose-600', 'text-white');
+          sosToggleBtn.classList.remove('bg-surface-850', 'text-rose-300');
+          document.getElementById('sosToggleText').textContent = 'SOS Active';
+          showToast('SOS Extreme Thrift Protocol Activated!', true);
+        } else {
+          sosToggleBtn.classList.remove('bg-rose-600', 'text-white');
+          sosToggleBtn.classList.add('bg-surface-850', 'text-rose-300');
+          document.getElementById('sosToggleText').textContent = 'SOS Protocol';
+          showToast('Returned to Standard Runway Monitoring');
+        }
+        recalculateAll();
+      });
+
+      // Jump to SOS Action Tab button inside banner
+      document.getElementById('jumpToSosActionBtn').addEventListener('click', () => {
+        const sosTabBtn = document.querySelector('[data-target="tab-sos"]');
+        if (sosTabBtn) sosTabBtn.click();
+      });
+
+      // Scrape Recipe button
+      document.getElementById('scrapeRecipesBtn').addEventListener('click', () => {
+        matchSurvivalRecipes();
+        showToast('Pantry scraped for optimal calories');
+      });
+
+      // Calendar sync auto button
+      document.getElementById('autoDaysBtn').addEventListener('click', syncDaysRemainingFromCalendar);
+
+      // Currency selector
+      document.getElementById('currencySelector').addEventListener('change', (e) => {
+        appState.currency = e.target.value;
+        document.querySelectorAll('.currency-symbol').forEach(el => el.textContent = appState.currency);
+        recalculateAll();
+        showToast(`Currency set to ${appState.currency}`);
+      });
+
+      // Report Modal
+      const reportModal = document.getElementById('reportModal');
+      document.getElementById('exportReportBtn').addEventListener('click', () => {
+        const text = generateMonthlyReport();
+        document.getElementById('reportModalBody').textContent = text;
+        reportModal.classList.remove('hidden');
+      });
+
+      document.getElementById('closeReportModalBtn').addEventListener('click', () => {
+        reportModal.classList.add('hidden');
+      });
+
+      document.getElementById('copyReportTextBtn').addEventListener('click', () => {
+        const text = document.getElementById('reportModalBody').textContent;
+        // Use document.execCommand('copy') to ensure iframe safety
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = text;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        try {
+          document.execCommand('copy');
+          const btnLabel = document.getElementById('copyReportBtnLabel');
+          btnLabel.textContent = 'Copied!';
+          setTimeout(() => { btnLabel.textContent = 'Copy to Clipboard'; }, 2000);
+          showToast('Report copied to clipboard');
+        } catch (err) {
+          console.error('Copy failed', err);
+        }
+        document.body.removeChild(tempTextArea);
+      });
+
+      // Reset Modal Dialog
+      const resetModal = document.getElementById('confirmResetModal');
+      document.getElementById('resetDataBtn').addEventListener('click', () => {
+        resetModal.classList.remove('hidden');
+      });
+
+      document.getElementById('cancelResetBtn').addEventListener('click', () => {
+        resetModal.classList.add('hidden');
+      });
+
+      document.getElementById('confirmExecuteResetBtn').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        appState.expenses = [];
+        appState.cashRemaining = 3500;
+        appState.fixedBills = 500;
+        appState.dailyTargetCap = 200;
+        appState.sosModeActive = false;
+        syncDaysRemainingFromCalendar();
+        resetModal.classList.add('hidden');
+        showToast('Ledger reset to baseline');
+      });
+
+    });
+  </script>
+</body>
+</html>
